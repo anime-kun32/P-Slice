@@ -1,0 +1,39 @@
+name: Build HTML5
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-html5:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Haxe 4.2.5 Manually
+        run: |
+          wget https://github.com/HaxeFoundation/haxe/releases/download/4.2.5/haxe-4.2.5-linux64.tar.gz
+          tar -xzf haxe-4.2.5-linux64.tar.gz
+          mv haxe_* $HOME/haxe
+          chmod +x $HOME/haxe/haxe
+          chmod +x $HOME/haxe/haxelib
+          echo "$HOME/haxe" >> $GITHUB_PATH
+
+      - name: Verify Haxe Installation
+        run: haxe -version
+
+      - name: Install Lime & OpenFL
+        run: |
+          haxelib install lime
+          haxelib run lime setup --quiet
+          haxelib install openfl
+          haxelib run openfl setup --quiet
+
+      - name: Run Setup Script
+        run: |
+          chmod +x setup/Unix.sh
+          ./setup/Unix.sh
+
+      - name: Build HTML5
+        run: lime test html5 -final
